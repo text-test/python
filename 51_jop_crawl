@@ -1,0 +1,68 @@
+import requests
+from bs4 import BeautifulSoup
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
+}
+
+
+def dtl(url):
+    html = requests.get(url, headers=headers)
+    # print(html.encoding)#GBK
+    # print(html.apparent_encoding) #GBK
+    html.encoding = 'GBK'
+
+    soup = BeautifulSoup(html.text, 'lxml')
+    try:
+        title = \
+        soup.select('body > div.tCompanyPage > div.tCompany_center.clearfix > div.tHeader.tHjob > div > div.cn > h1')[0].text
+        print(title)
+        job = open('51_数据分析.txt', 'a')
+        job.write(title)
+    except Exception as e:
+        print(e)
+    
+    try:
+        company_name = soup.select(
+            'body > div.tCompanyPage > div.tCompany_center.clearfix > div.tCompany_sidebar > div:nth-child(1) > div.com_msg > a > p')[
+            0].text
+        print(company_name)
+        job = open('51_数据分析.txt', 'a')
+        job.write(company_name)
+    except Exception as a:
+        print(a)
+
+    try:
+        money = \
+        soup.select('body > div.tCompanyPage > div.tCompany_center.clearfix > div.tHeader.tHjob > div > div.cn > strong')[
+            0].text
+        print(money)
+        job = open('51_数据分析.txt', 'a')
+        job.write(money + '\n')
+    except Exception as b:
+        print(b)
+
+
+
+
+def crawl():
+    for page in range(10, 17):
+        html = requests.get(
+            'https://search.51job.com/list/040000,000000,0000,00,9,99,%25E6%2595%25B0%25E6%258D%25AE%25E5%2588%2586%25E6%259E%2590%25E5%25B8%2588,2,{}.html'.format(
+                page),
+            headers=headers
+        )
+        # print(html.encoding)#GBK
+        # print(html.apparent_encoding) #GBK
+        html.encoding = 'GBK'
+        soup = BeautifulSoup(html.text, 'lxml')
+        for i in range(4, 50):
+            url = soup.select('#resultList > div:nth-child({}) > p > span > a'.format(i))[0]['href']
+            work_place=soup.select('#resultList > div:nth-child(4) > span.t3')[0].text
+            print(work_place,url)
+            job = open('51_数据分析.txt', 'a')
+            job.write(work_place)
+            job.write(url)
+            dtl(url)
+
+crawl()
